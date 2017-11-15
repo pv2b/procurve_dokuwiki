@@ -83,8 +83,8 @@ class ProcurveVlan(object):
     def _get_regexes(self):
         return [
             (r'^\s+name "?(?P<vlan_name>.+?)"?$', self.set_name),
-            (r'^\s+untagged (?P<if_numbers>\w(?:[\w,-]*\w))?$', self.add_untagged),
-            (r'^\s+tagged (?P<if_numbers>\w(?:[\w,-]*\w))?$', self.add_tagged)
+            (r'^\s+untagged (?P<if_numbers>\w(?:[\w,-]*\w))$', self.add_untagged),
+            (r'^\s+tagged (?P<if_numbers>\w(?:[\w,-]*\w))$', self.add_tagged)
         ]
 
     def set_name(self, vlan_name):
