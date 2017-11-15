@@ -34,7 +34,7 @@ from itertools import chain, zip_longest
 import re
 
 def ifkey(if_number):
-    m = re.match(r"^([A-Z]*)(\d*)$", if_number)
+    m = re.match(r"^([A-Za-z]*)(\d*)$", if_number)
     letter, number = m.groups()
     return letter, int(number)
 
@@ -50,7 +50,7 @@ class ProcurveInterfaceCollection():
                 self.add_if_number(if_number_or_range)
 
     def add_if_number_range(self, if_number_range):
-        m = re.match(r"([A-Z]?)(\d+)-\1(\d+)", if_number_range)
+        m = re.match(r"([A-Za-z]*)(\d+)-\1(\d+)", if_number_range)
         module, start, end = m.groups()
         start = int(start)
         end = int(end)
