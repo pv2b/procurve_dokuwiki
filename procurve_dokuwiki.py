@@ -226,7 +226,7 @@ def main():
     column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
 
     if TABLEWIDTH:
-        print("|< 100% - -" + vlan_count*" 3em" + " >|")
+        print("|< 100% - - -" + vlan_count*" 3em" + " >|")
     print("^ %s ^^^ %s %s" % (cfg.hostname, VLAN_HEADING, vlan_count * '^'))
     print(fmt_row(heading_row, column_widths, '^'))
     for data_row in data_rows:
