@@ -145,7 +145,7 @@ class ProcurveConfig(object):
 
     def get_all_vlans(self):
         vlan_numbers = list(self._vlans.keys())
-        vlan_numbers.sort()
+        vlan_numbers.sort(key=int)
         return map(self._get_vlan_by_number, vlan_numbers)
 
     def __init__(self, fp):
