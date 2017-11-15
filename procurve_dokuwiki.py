@@ -165,7 +165,9 @@ def main():
     ifaces = list(cfg.get_all_interfaces())
     vlan_count = len(vlans)
 
-    rows = []
+    heading_row = [IFACE_NUMBER_HEADING, IFACE_NAME_HEADING] + [str(vlan.number) for vlan in vlans]
+
+    data_rows = []
     for iface in ifaces:
         data = [iface.number, iface.name or '']
         for vlan in vlans:
@@ -175,40 +177,15 @@ def main():
                 data += ['U']
             else:
                 data += ['']
-        rows += [data]
+        data_rows += [data]
 
-    iface_number_field_width = len(IFACE_NUMBER_HEADING)
-    for iface in ifaces:
-        if iface.number:
-            iface_number_field_width = max(iface_number_field_width, len(iface.number))
+    # Get maximum length of data in each column
+    column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
 
-    iface_name_field_width = len(IFACE_NAME_HEADING)
-    for iface in ifaces:
-        if iface.name:
-            iface_name_field_width = max(iface_name_field_width, len(iface.name))
-
-    vlan_heading_width = 6 * vlan_count - 3
-    
-    iface_name_heading_field_width = iface_name_field_width
-    if vlan_heading_width < len(VLAN_HEADING):
-        iface_name_heading_field_width -= len(VLAN_HEADING) - vlan_heading_width
-
-    print(fmt_row(
-        [IFACE_NUMBER_HEADING, IFACE_NAME_HEADING, VLAN_HEADING],
-        [iface_number_field_width, iface_name_heading_field_width, vlan_heading_width],
-        '^'
-    ) + vlan_count * '^')
-
-    column_widths = [iface_number_field_width, iface_name_field_width] + [4]*vlan_count
-    
-    print(fmt_row(
-        [':::', ':::'] + [str(vlan.number) for vlan in vlans],
-        column_widths,
-        '^'
-    ))
-
-    for data in rows:
-        print(fmt_row(data, column_widths))
+    print("^^^ %s %s" % (VLAN_HEADING, vlan_count * '^'))
+    print(fmt_row(heading_row, column_widths, '^'))
+    for data_row in data_rows:
+        print(fmt_row(data_row, column_widths))
 
 if __name__ == '__main__':
     main()
