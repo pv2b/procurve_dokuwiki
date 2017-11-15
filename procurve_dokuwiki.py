@@ -24,6 +24,7 @@
 # SOFTWARE.
 
 IFACE_NUMBER_HEADING = "Port"
+IFACE_TRUNK_HEADING = "Trunk"
 IFACE_NAME_HEADING = "Beskrivning"
 VLAN_HEADING = "VLAN-konfiguration (T=taggad, U=otaggad)"
 COLLAPSE = True
@@ -64,6 +65,7 @@ class ProcurveInterface(object):
     def __init__(self, number):
         self.number = number
         self.name = None
+        self.trunk = None
 
     def _get_regexes(self):
         return [
@@ -96,6 +98,11 @@ class ProcurveVlan(object):
     def add_tagged(self, if_numbers):
         self.tagged.add_if_numbers(if_numbers)
 
+class ProcurveTrunk(object):
+    def __init__(self):
+        self.trunkname = None
+        self.members = ProcurveInterfaceCollection()
+
 class ProcurveConfig(object):
     def _get_iface_by_number(self, if_number):
         if if_number in self._interfaces:
@@ -116,6 +123,7 @@ class ProcurveConfig(object):
             (r'^interface (?P<if_number>\w+)$', self._enter_interface_context),
             (r'^vlan (?P<vlan_number>\d+)$', self._enter_vlan_context),
             (r'^hostname "?(?P<hostname>.+?)"?$', self._set_hostname),
+            (r'^trunk (?P<members>\w(?:[\w,-]*\w)) (?P<trunkname>Trk\d+)', self._set_trunk),
             (r'^\s*exit$', self._exit_context)
         ]
 
@@ -129,6 +137,13 @@ class ProcurveConfig(object):
 
     def _set_hostname(self, hostname):
         self.hostname = hostname
+
+    def _set_trunk(self, trunkname, members):
+        t = ProcurveTrunk()
+        t.trunkname = trunkname
+        t.members.add_if_number_range(members)
+        for member in t.members.interfaces:
+            self._get_iface_by_number(member).trunk = t
 
     def _exit_context(self):
         self._context_regexes = []
@@ -184,15 +199,22 @@ def main():
     ifaces = list(cfg.get_all_interfaces())
     vlan_count = len(vlans)
 
-    heading_row = [IFACE_NUMBER_HEADING, IFACE_NAME_HEADING] + [str(vlan.number) for vlan in vlans]
+    heading_row = [IFACE_NUMBER_HEADING, IFACE_TRUNK_HEADING, IFACE_NAME_HEADING] + [str(vlan.number) for vlan in vlans]
 
     data_rows = []
     for iface in ifaces:
-        data = [iface.number, iface.name or '']
+        if iface.number.startswith('Trk'):
+            continue
+        if iface.trunk:
+            if_num = iface.trunk.trunkname
+            data = [iface.number, if_num, iface.name or '']
+        else:
+            if_num = iface.number
+            data = [iface.number, '', iface.name or '']
         for vlan in vlans:
-            if iface.number in vlan.tagged.interfaces:
+            if if_num in vlan.tagged.interfaces:
                 data += ['T']
-            elif iface.number in vlan.untagged.interfaces:
+            elif if_num in vlan.untagged.interfaces:
                 data += ['U']
             else:
                 data += ['']
@@ -205,7 +227,7 @@ def main():
 
     if TABLEWIDTH:
         print("|< 100% - -" + vlan_count*" 3em" + " >|")
-    print("^ %s ^^ %s %s" % (cfg.hostname, VLAN_HEADING, vlan_count * '^'))
+    print("^ %s ^^^ %s %s" % (cfg.hostname, VLAN_HEADING, vlan_count * '^'))
     print(fmt_row(heading_row, column_widths, '^'))
     for data_row in data_rows:
         print(fmt_row(data_row, column_widths))
