@@ -167,7 +167,7 @@ def fmt_row(column_data, column_widths, separator='|'):
 
 def collapse_rows(data_rows):
     last_row = reference_row = data_rows[0]
-    for current_row in data_rows[1:]+[]:
+    for current_row in data_rows[1:]+[[]]:
         if current_row[1:] != reference_row[1:]:
             first, last = reference_row[0], last_row[0]
             if first == last:
