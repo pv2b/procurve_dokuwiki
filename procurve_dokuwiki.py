@@ -114,6 +114,7 @@ class ProcurveConfig(object):
         return [
             (r'^interface (?P<if_number>\w+)$', self._enter_interface_context),
             (r'^vlan (?P<vlan_number>\d+)$', self._enter_vlan_context),
+            (r'^hostname "?(?P<hostname>.+?)"?$', self._set_hostname),
             (r'^\s*exit$', self._exit_context)
         ]
 
@@ -124,6 +125,9 @@ class ProcurveConfig(object):
     def _enter_vlan_context(self, vlan_number):
         vlan = self._get_vlan_by_number(vlan_number)
         self._context_regexes = vlan._get_regexes()
+
+    def _set_hostname(self, hostname):
+        self.hostname = hostname
 
     def _exit_context(self):
         self._context_regexes = []
@@ -147,6 +151,7 @@ class ProcurveConfig(object):
         self._interfaces = {}
         self._vlans = {}
         self._context_regexes = []
+        self.hostname = ''
         _global_regexes = self._get_regexes()
         for line in fp:
             for regex, func in chain(self._context_regexes, _global_regexes):
@@ -197,7 +202,7 @@ def main():
     # Get maximum length of data in each column
     column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
 
-    print("^ ^^ %s %s" % (VLAN_HEADING, vlan_count * '^'))
+    print("^ %s ^^ %s %s" % (cfg.hostname, VLAN_HEADING, vlan_count * '^'))
     print(fmt_row(heading_row, column_widths, '^'))
     for data_row in data_rows:
         print(fmt_row(data_row, column_widths))
