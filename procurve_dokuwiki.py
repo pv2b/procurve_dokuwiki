@@ -23,6 +23,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+IFACE_NUMBER_HEADING = "Port"
+IFACE_NAME_HEADING = "Beskrivning"
+VLAN_HEADING = "VLAN-konfiguration (T=taggad, U=otaggad)"
+
 from sys import stdin
 from itertools import chain
 import re
@@ -154,10 +158,6 @@ def main():
     vlans = list(cfg.get_all_vlans())
     ifaces = list(cfg.get_all_interfaces())
     vlan_count = len(vlans)
-
-    IFACE_NUMBER_HEADING = "Port"
-    IFACE_NAME_HEADING = "Beskrivning"
-    VLAN_HEADING = "VLAN-konfiguration (T=taggad, U=otaggad)"
 
     iface_number_field_width = len(IFACE_NUMBER_HEADING)
     for iface in ifaces:
