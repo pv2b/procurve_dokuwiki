@@ -197,7 +197,7 @@ def main():
     # Get maximum length of data in each column
     column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
 
-    print("^^^ %s %s" % (VLAN_HEADING, vlan_count * '^'))
+    print("^ ^^ %s %s" % (VLAN_HEADING, vlan_count * '^'))
     print(fmt_row(heading_row, column_widths, '^'))
     for data_row in data_rows:
         print(fmt_row(data_row, column_widths))
