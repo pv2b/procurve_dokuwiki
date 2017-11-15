@@ -27,6 +27,7 @@ IFACE_NUMBER_HEADING = "Port"
 IFACE_NAME_HEADING = "Beskrivning"
 VLAN_HEADING = "VLAN-konfiguration (T=taggad, U=otaggad)"
 COLLAPSE = True
+TABLEWIDTH = True
 
 from sys import stdin
 from itertools import chain, zip_longest
@@ -202,6 +203,8 @@ def main():
     # Get maximum length of data in each column
     column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
 
+    if TABLEWIDTH:
+        print("|< 100% - -" + vlan_count*" 3em" + " >|")
     print("^ %s ^^ %s %s" % (cfg.hostname, VLAN_HEADING, vlan_count * '^'))
     print(fmt_row(heading_row, column_widths, '^'))
     for data_row in data_rows:
