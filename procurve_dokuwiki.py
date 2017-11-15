@@ -26,9 +26,10 @@
 IFACE_NUMBER_HEADING = "Port"
 IFACE_NAME_HEADING = "Beskrivning"
 VLAN_HEADING = "VLAN-konfiguration (T=taggad, U=otaggad)"
+COLLAPSE = True
 
 from sys import stdin
-from itertools import chain
+from itertools import chain, zip_longest
 import re
 
 def ifkey(if_number):
@@ -159,6 +160,18 @@ def fmt_row(column_data, column_widths, separator='|'):
         row += ' %s %s' % (d.ljust(w), separator)
     return row
 
+def collapse_rows(data_rows):
+    last_row = reference_row = data_rows[0]
+    for current_row in data_rows[1:]+[]:
+        if current_row[1:] != reference_row[1:]:
+            first, last = reference_row[0], last_row[0]
+            if first == last:
+                yield reference_row
+            else:
+                yield ["%s-%s" % (first, last)] + reference_row[1:]
+            reference_row = current_row
+        last_row = current_row
+
 def main():
     cfg = ProcurveConfig(stdin)
     vlans = list(cfg.get_all_vlans())
@@ -178,6 +191,8 @@ def main():
             else:
                 data += ['']
         data_rows += [data]
+    if COLLAPSE:
+        data_rows = list(collapse_rows(data_rows))
 
     # Get maximum length of data in each column
     column_widths = [max(len(row[i]) for row in chain([heading_row], data_rows)) for i in range(len(heading_row))]
