@@ -69,7 +69,7 @@ class ProcurveInterface(object):
 
     def _get_regexes(self):
         return [
-            (r'^\s+name "?(?P<if_name>.+?)"?$', self.set_name)
+            (r'^\s+name "?(?P<if_name>.+?)"?\s*$', self.set_name)
         ]
 
     def set_name(self, if_name):
@@ -84,9 +84,9 @@ class ProcurveVlan(object):
 
     def _get_regexes(self):
         return [
-            (r'^\s+name "?(?P<vlan_name>.+?)"?$', self.set_name),
-            (r'^\s+untagged (?P<if_numbers>\w(?:[\w,-]*\w)?)$', self.add_untagged),
-            (r'^\s+tagged (?P<if_numbers>\w(?:[\w,-]*\w)?)$', self.add_tagged)
+            (r'^\s+name "?(?P<vlan_name>.+?)"?\s*$', self.set_name),
+            (r'^\s+untagged (?P<if_numbers>\w(?:[\w,-]*\w)?)\s*$', self.add_untagged),
+            (r'^\s+tagged (?P<if_numbers>\w(?:[\w,-]*\w)?)\s*$', self.add_tagged)
         ]
 
     def set_name(self, vlan_name):
@@ -120,11 +120,11 @@ class ProcurveConfig(object):
 
     def _get_regexes(self):
         return [
-            (r'^interface (?P<if_number>\w+)$', self._enter_interface_context),
-            (r'^vlan (?P<vlan_number>\d+)$', self._enter_vlan_context),
-            (r'^hostname "?(?P<hostname>.+?)"?$', self._set_hostname),
+            (r'^interface (?P<if_number>\w+)\s*$', self._enter_interface_context),
+            (r'^vlan (?P<vlan_number>\d+)\s*$', self._enter_vlan_context),
+            (r'^hostname "?(?P<hostname>.+?)"?\s*$', self._set_hostname),
             (r'^trunk (?P<members>\w(?:[\w,-]*\w)?) (?P<trunkname>Trk\d+)', self._set_trunk),
-            (r'^\s*exit$', self._exit_context)
+            (r'^\s*exit\s*$', self._exit_context)
         ]
 
     def _enter_interface_context(self, if_number):
