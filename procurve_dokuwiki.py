@@ -165,6 +165,18 @@ def main():
     ifaces = list(cfg.get_all_interfaces())
     vlan_count = len(vlans)
 
+    rows = []
+    for iface in ifaces:
+        data = [iface.number, iface.name or '']
+        for vlan in vlans:
+            if iface.number in vlan.tagged.interfaces:
+                data += ['T']
+            elif iface.number in vlan.untagged.interfaces:
+                data += ['U']
+            else:
+                data += ['']
+        rows += [data]
+
     iface_number_field_width = len(IFACE_NUMBER_HEADING)
     for iface in ifaces:
         if iface.number:
@@ -195,15 +207,7 @@ def main():
         '^'
     ))
 
-    for iface in ifaces:
-        data = [iface.number, iface.name or '']
-        for vlan in vlans:
-            if iface.number in vlan.tagged.interfaces:
-                data += ['T']
-            elif iface.number in vlan.untagged.interfaces:
-                data += ['U']
-            else:
-                data += ['']
+    for data in rows:
         print(fmt_row(data, column_widths))
 
 if __name__ == '__main__':
