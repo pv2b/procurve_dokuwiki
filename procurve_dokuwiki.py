@@ -153,6 +153,12 @@ class ProcurveConfig(object):
                 if m:
                     func(**m.groupdict())
 
+def fmt_row(column_data, column_widths, separator='|'):
+    row = '%s' % separator
+    for d, w in zip(column_data, column_widths):
+        row += ' %s %s' % (d.ljust(w), separator)
+    return row
+
 def main():
     cfg = ProcurveConfig(stdin)
     vlans = list(cfg.get_all_vlans())
@@ -169,37 +175,36 @@ def main():
         if iface.name:
             iface_name_field_width = max(iface_name_field_width, len(iface.name))
 
-    vlan_heading_width = 6 * vlan_count - 2
+    vlan_heading_width = 6 * vlan_count - 3
     
     iface_name_heading_field_width = iface_name_field_width
     if vlan_heading_width < len(VLAN_HEADING):
         iface_name_heading_field_width -= len(VLAN_HEADING) - vlan_heading_width
 
-    outline = "^ " + IFACE_NUMBER_HEADING.ljust(iface_number_field_width)
-    outline += " ^ " + IFACE_NAME_HEADING.ljust(iface_name_heading_field_width)
-    outline += " ^ " + VLAN_HEADING.ljust(vlan_heading_width) + " "
-    outline += vlan_count * "^"
-    print(outline)
+    print(fmt_row(
+        [IFACE_NUMBER_HEADING, IFACE_NAME_HEADING, VLAN_HEADING],
+        [iface_number_field_width, iface_name_heading_field_width, vlan_heading_width],
+        '^'
+    ) + vlan_count * '^')
 
-    outline = "^ " + ":::".ljust(iface_number_field_width)
-    outline += " ^ " + ":::".ljust(iface_name_field_width) + " ^"
-    for vlan in vlans:
-        outline += " %4s ^" % vlan.number
-    print(outline)
+    column_widths = [iface_number_field_width, iface_name_field_width] + [4]*vlan_count
+    
+    print(fmt_row(
+        [':::', ':::'] + [str(vlan.number) for vlan in vlans],
+        column_widths,
+        '^'
+    ))
 
     for iface in ifaces:
-        number = iface.number or ''
-        name = iface.name or ''
-        outline = "| " + number.ljust(iface_number_field_width)
-        outline += " | " + name.ljust(iface_name_field_width) + " |"
+        data = [iface.number, iface.name or '']
         for vlan in vlans:
             if iface.number in vlan.tagged.interfaces:
-                outline += " T    |"
+                data += ['T']
             elif iface.number in vlan.untagged.interfaces:
-                outline += " U    |"
+                data += ['U']
             else:
-                outline += "      |"
-        print(outline)
+                data += ['']
+        print(fmt_row(data, column_widths))
 
 if __name__ == '__main__':
     main()
